@@ -121,7 +121,7 @@ aggdata &lt;- aggdata %&gt;%
                       Mean = mean,
                       Maximum = max), steps)
 row.names(aggdata) &lt;- &quot;Steps per day&quot;
-kable(aggdata)</code></pre>
+kable(aggdata, format = &quot;markdown&quot;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -183,7 +183,7 @@ maxsteps_interval &lt;- format(maxsteps$datetime, &quot;%R&quot;)</code></pre>
   summarize(complete = sum(!is.na(steps)))
 na_days &lt;- days_intervals %&gt;%
   filter(complete == 0)
-kable(na_days)</code></pre>
+kable(na_days, format = &quot;markdown&quot;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -247,7 +247,7 @@ impdata &lt;- pdata %&gt;%
                         round(steps.y),
                         steps.x)) %&gt;%
   select(-steps.x, -steps.y)
-kable(head(impdata))</code></pre>
+kable(head(impdata), format = &quot;markdown&quot;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -317,9 +317,8 @@ ggplot(aggdata) +
 <p>This can be better understood by examining the data some more. As previously demonstrated, there are 8 days in the dataset where no activity has been recorded (missing data). But what about days with <strong>partial activity</strong>, that is, where the data for only a few of the 5-minute intervals is missing? This can be shown with the table below:</p>
 <pre class="r"><code>days_intervals %&gt;%
   count(complete) %&gt;%
-  kable(caption = &quot;Number of complete 5-minute intervals vs. number of days&quot;)</code></pre>
+  kable(format = &quot;markdown&quot;)</code></pre>
 <table>
-<caption>Number of complete 5-minute intervals vs. number of days</caption>
 <thead>
 <tr class="header">
 <th align="right">complete</th>
@@ -337,7 +336,7 @@ ggplot(aggdata) +
 </tr>
 </tbody>
 </table>
-<p>As the table shows, there have only been days where all data is missing, or days where all data is present. So all that data imputation did was add 8 more days to the dataset where the number of steps is the mean. This is why the histogram bar corresponding to the mean increased by 8 days where all other bars remained the same.</p>
+<p>As the table shows, there have only been days where all data is missing, or days where all data (288 complete observations) is present. So all that data imputation did was add 8 more days to the dataset where the number of steps is the mean. This is why the histogram bar corresponding to the mean increased by 8 days where all other bars remained the same.</p>
 </div>
 <div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
@@ -349,7 +348,7 @@ ggplot(aggdata) +
                           &quot;weekend&quot;, # weekend means Sat or Sun
                           &quot;weekday&quot;)) %&gt;%
   mutate(weekend = as.factor(weekend))
-kable(head(impdata_w))</code></pre>
+kable(head(impdata_w), format = &quot;markdown&quot;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -409,6 +408,8 @@ kable(head(impdata_w))</code></pre>
 <li>Make a panel plot containing a time series plot (i.e. <code>type = &quot;l&quot;</code>) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).</li>
 </ol>
 <pre class="r"><code>activity_w &lt;- impdata_w %&gt;%
+  # trick - use today + (HH:MM from interval) as datetime, so it can later
+  # be used in the ggplot X axis to print the interval as HH:MM
   mutate(datetime = as.POSIXct(today()) +
            hours(hour(datetime)) +
            minutes(minute(datetime))) %&gt;%

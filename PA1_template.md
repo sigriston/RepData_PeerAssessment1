@@ -69,12 +69,14 @@ aggdata <- aggdata %>%
                       Mean = mean,
                       Maximum = max), steps)
 row.names(aggdata) <- "Steps per day"
-kable(aggdata)
+kable(aggdata, format = "markdown")
 ```
 
-                 Minimum   Median       Mean   Maximum
---------------  --------  -------  ---------  --------
-Steps per day         41    10765   10766.19     21194
+
+
+|              | Minimum| Median|     Mean| Maximum|
+|:-------------|-------:|------:|--------:|-------:|
+|Steps per day |      41|  10765| 10766.19|   21194|
 
 ## What is the average daily activity pattern?
 
@@ -132,21 +134,21 @@ days_intervals <- pdata %>%
   summarize(complete = sum(!is.na(steps)))
 na_days <- days_intervals %>%
   filter(complete == 0)
-kable(na_days)
+kable(na_days, format = "markdown")
 ```
 
 
 
-date          complete
------------  ---------
-2012-10-01           0
-2012-10-08           0
-2012-11-01           0
-2012-11-04           0
-2012-11-09           0
-2012-11-10           0
-2012-11-14           0
-2012-11-30           0
+|date       | complete|
+|:----------|--------:|
+|2012-10-01 |        0|
+|2012-10-08 |        0|
+|2012-11-01 |        0|
+|2012-11-04 |        0|
+|2012-11-09 |        0|
+|2012-11-10 |        0|
+|2012-11-14 |        0|
+|2012-11-30 |        0|
 
 Therefore, imputting missing values based on the average for the day would not work for these days.
 
@@ -176,19 +178,19 @@ impdata <- pdata %>%
                         round(steps.y),
                         steps.x)) %>%
   select(-steps.x, -steps.y)
-kable(head(impdata))
+kable(head(impdata), format = "markdown")
 ```
 
 
 
-date          interval  datetime               steps
------------  ---------  --------------------  ------
-2012-10-01           0  2012-10-01 00:00:00        2
-2012-10-01           5  2012-10-01 00:05:00        0
-2012-10-01          10  2012-10-01 00:10:00        0
-2012-10-01          15  2012-10-01 00:15:00        0
-2012-10-01          20  2012-10-01 00:20:00        0
-2012-10-01          25  2012-10-01 00:25:00        2
+|date       | interval|datetime            | steps|
+|:----------|--------:|:-------------------|-----:|
+|2012-10-01 |        0|2012-10-01 00:00:00 |     2|
+|2012-10-01 |        5|2012-10-01 00:05:00 |     0|
+|2012-10-01 |       10|2012-10-01 00:10:00 |     0|
+|2012-10-01 |       15|2012-10-01 00:15:00 |     0|
+|2012-10-01 |       20|2012-10-01 00:20:00 |     0|
+|2012-10-01 |       25|2012-10-01 00:25:00 |     2|
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -227,23 +229,21 @@ can be shown with the table below:
 ```r
 days_intervals %>%
   count(complete) %>%
-  kable(caption = "Number of complete 5-minute intervals vs. number of days")
+  kable(format = "markdown")
 ```
 
 
 
-Table: Number of complete 5-minute intervals vs. number of days
+| complete|  n|
+|--------:|--:|
+|        0|  8|
+|      288| 53|
 
- complete    n
----------  ---
-        0    8
-      288   53
-
-As the table shows, there have only been days where all data is missing, or
-days where all data is present. So all that data imputation did was add 8
-more days to the dataset where the number of steps is the mean. This is 
-why the histogram bar corresponding to the mean increased by 8 days where
-all other bars remained the same.
+As the table shows, there have only been days where all data is missing, or days
+where all data (288 complete observations) is present. So all that data
+imputation did was add 8 more days to the dataset where the number of steps is
+the mean. This is why the histogram bar corresponding to the mean increased by 8
+days where all other bars remained the same.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -257,19 +257,19 @@ impdata_w <- impdata %>%
                           "weekend", # weekend means Sat or Sun
                           "weekday")) %>%
   mutate(weekend = as.factor(weekend))
-kable(head(impdata_w))
+kable(head(impdata_w), format = "markdown")
 ```
 
 
 
-date          interval  datetime               steps  weekend 
------------  ---------  --------------------  ------  --------
-2012-10-01           0  2012-10-01 00:00:00        2  weekday 
-2012-10-01           5  2012-10-01 00:05:00        0  weekday 
-2012-10-01          10  2012-10-01 00:10:00        0  weekday 
-2012-10-01          15  2012-10-01 00:15:00        0  weekday 
-2012-10-01          20  2012-10-01 00:20:00        0  weekday 
-2012-10-01          25  2012-10-01 00:25:00        2  weekday 
+|date       | interval|datetime            | steps|weekend |
+|:----------|--------:|:-------------------|-----:|:-------|
+|2012-10-01 |        0|2012-10-01 00:00:00 |     2|weekday |
+|2012-10-01 |        5|2012-10-01 00:05:00 |     0|weekday |
+|2012-10-01 |       10|2012-10-01 00:10:00 |     0|weekday |
+|2012-10-01 |       15|2012-10-01 00:15:00 |     0|weekday |
+|2012-10-01 |       20|2012-10-01 00:20:00 |     0|weekday |
+|2012-10-01 |       25|2012-10-01 00:25:00 |     2|weekday |
 
 2. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the
 5-minute interval (x-axis) and the average number of steps taken, averaged
@@ -278,6 +278,8 @@ across all weekday days or weekend days (y-axis).
 
 ```r
 activity_w <- impdata_w %>%
+  # trick - use today + (HH:MM from interval) as datetime, so it can later
+  # be used in the ggplot X axis to print the interval as HH:MM
   mutate(datetime = as.POSIXct(today()) +
            hours(hour(datetime)) +
            minutes(minute(datetime))) %>%
