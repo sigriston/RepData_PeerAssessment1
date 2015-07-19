@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -13,7 +8,8 @@ output:
 A simple way to load the activity data in R is to use the base R functions
 `read.csv` and `unz` like this:
 
-```{r}
+
+```r
 rawdata <- read.csv(unz("activity.zip", "activity.csv"),
                     colClasses = c(steps = "integer",
                                    date = "character",
@@ -27,7 +23,8 @@ For processing dates and times (the `date` and `interval` fields), we used the
 `lubridate` package, with the `dplyr` package to mutate the data frame adding a
 new column `datetime`:
 
-```{r, message=FALSE}
+
+```r
 library(dplyr)
 library(lubridate)
 pdata <- rawdata %>%
@@ -40,7 +37,8 @@ pdata <- rawdata %>%
 
 1. Make a histogram of the total number of steps taken each day
 
-```{r}
+
+```r
 library(ggplot2)
 aggdata <- pdata %>%
   group_by(date) %>%
@@ -55,10 +53,13 @@ ggplot(aggdata) +
        y = "Count (days)")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 2. Calculate and report the **mean** and **median** total number of steps taken 
 per day
 
-```{r}
+
+```r
 library(knitr)
 aggdata <- aggdata %>%
   ungroup() %>%
@@ -71,12 +72,17 @@ row.names(aggdata) <- "Steps per day"
 kable(aggdata)
 ```
 
+                 Minimum   Median       Mean   Maximum
+--------------  --------  -------  ---------  --------
+Steps per day         41    10765   10766.19     21194
+
 ## What is the average daily activity pattern?
 
 1. Make a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis)
 and the average number of steps taken, averaged across all days (y-axis)
 
-```{r}
+
+```r
 library(scales)
 aggdata <- pdata %>%
   filter(!is.na(steps)) %>%
@@ -90,32 +96,37 @@ ggplot(aggdata, aes(datetime, steps)) +
        y = "Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
 2. Which 5-minute interval, on average across all the days in the dataset,
 contains the maximum number of steps?
 
-```{r}
+
+```r
 maxsteps <- aggdata %>% filter(steps == max(steps))
 maxsteps_interval <- format(maxsteps$datetime, "%R")
 ```
 
 On average, the 5-minute interval containing the maximum number of steps is
-**`r maxsteps_interval`**.
+**08:35**.
 
 ## Imputing missing values
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)
 
-```{r}
+
+```r
 na_rows <- sum(is.na(pdata$steps))
 ```
 
-There are **`r na_rows`** missing values in the dataset.
+There are **2304** missing values in the dataset.
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 There are several days in the dataset with no data (missing data for all 5-minute intervals in that day), as the table below shows:
 
-```{r}
+
+```r
 days_intervals <- pdata %>%
   group_by(date) %>%
   summarize(complete = sum(!is.na(steps)))
@@ -124,9 +135,23 @@ na_days <- days_intervals %>%
 kable(na_days)
 ```
 
+
+
+date          complete
+-----------  ---------
+2012-10-01           0
+2012-10-08           0
+2012-11-01           0
+2012-11-04           0
+2012-11-09           0
+2012-11-10           0
+2012-11-14           0
+2012-11-30           0
+
 Therefore, imputting missing values based on the average for the day would not work for these days.
 
-```{r}
+
+```r
 na_intervals <- pdata %>%
   group_by(interval) %>%
   summarize(complete = sum(!is.na(steps))) %>%
@@ -134,11 +159,12 @@ na_intervals <- pdata %>%
   nrow()
 ```
 
-However, there are **`r na_intervals`** 5-minute intervals where data is missing in every day of the dataset. This means an average value can be computed for every interval, which yields a better strategy for imputting missing values.
+However, there are **0** 5-minute intervals where data is missing in every day of the dataset. This means an average value can be computed for every interval, which yields a better strategy for imputting missing values.
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r}
+
+```r
 interval_means <- pdata %>%
   filter(!is.na(steps)) %>%
   group_by(interval) %>%
@@ -153,12 +179,24 @@ impdata <- pdata %>%
 kable(head(impdata))
 ```
 
+
+
+date          interval  datetime               steps
+-----------  ---------  --------------------  ------
+2012-10-01           0  2012-10-01 00:00:00        2
+2012-10-01           5  2012-10-01 00:05:00        0
+2012-10-01          10  2012-10-01 00:10:00        0
+2012-10-01          15  2012-10-01 00:15:00        0
+2012-10-01          20  2012-10-01 00:20:00        0
+2012-10-01          25  2012-10-01 00:25:00        2
+
 4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 This is the same histogram as before (same bins, parameters etc), but now 
 constructed after missing data has been imputted:
 
-```{r}
+
+```r
 library(ggplot2)
 aggdata <- impdata %>%
   group_by(date) %>%
@@ -173,6 +211,8 @@ ggplot(aggdata) +
        y = "Count (days)")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
+
 The impact so far seems to be only that the tallest bar in the histogram 
 got taller (corresponding to the mean **and** median, as shown in the 
 previous sections), where all the other ones remained at the same values.
@@ -183,11 +223,21 @@ recorded (missing data). But what about days with **partial activity**, that
 is, where the data for only a few of the 5-minute intervals is missing? This
 can be shown with the table below:
 
-```{r}
+
+```r
 days_intervals %>%
   count(complete) %>%
   kable(caption = "Number of complete 5-minute intervals vs. number of days")
 ```
+
+
+
+Table: Number of complete 5-minute intervals vs. number of days
+
+ complete    n
+---------  ---
+        0    8
+      288   53
 
 As the table shows, there have only been days where all data is missing, or
 days where all data is present. So all that data imputation did was add 8
@@ -200,7 +250,8 @@ all other bars remained the same.
 1. Create a new factor variable in the dataset with two levels -- "weekday" and
 "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 impdata_w <- impdata %>%
   mutate(weekend = ifelse(wday(datetime) %in% c(1, 7),
                           "weekend", # weekend means Sat or Sun
@@ -209,11 +260,23 @@ impdata_w <- impdata %>%
 kable(head(impdata_w))
 ```
 
+
+
+date          interval  datetime               steps  weekend 
+-----------  ---------  --------------------  ------  --------
+2012-10-01           0  2012-10-01 00:00:00        2  weekday 
+2012-10-01           5  2012-10-01 00:05:00        0  weekday 
+2012-10-01          10  2012-10-01 00:10:00        0  weekday 
+2012-10-01          15  2012-10-01 00:15:00        0  weekday 
+2012-10-01          20  2012-10-01 00:20:00        0  weekday 
+2012-10-01          25  2012-10-01 00:25:00        2  weekday 
+
 2. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the
 5-minute interval (x-axis) and the average number of steps taken, averaged
 across all weekday days or weekend days (y-axis).
 
-```{r}
+
+```r
 activity_w <- impdata_w %>%
   mutate(datetime = as.POSIXct(today()) +
            hours(hour(datetime)) +
@@ -229,3 +292,5 @@ ggplot(activity_w) +
        x = "Time interval",
        y = "Steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png) 
